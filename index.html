@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>PhoneGap Application</title>
-        <style>
-            html{height:100%;}
-            body{height:100%;margin:0;padding:0;}
-            #map_placer{height:100%;width:100%;}
+        <meta name="viewport" content="user-scalable=no,initial-scale=1, maximum-scale=1,minimum-scale=1, width=device-width" />
+        <title>You are here...</title>
+        <style type="text/css">
+            html { height: 100% }
+            body { height: 100%; margin: 0; padding: 0 }
+            #map_placer { height: 100%; width: 100%; }
         </style>
-        <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
-        <script type="text/javascript"
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCEG-qhWjPbmE90RbReOEARprr1ajnyqN8&sensor=true"></script>
+        <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDsujp7vdVRPj7B5pZwdr4ZShABgVdNrCU&sensor=true"></script>
+        <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript">
-
-            // Wait for PhoneGap to load
+            //Add event listener to run when the device is ready
             document.addEventListener("deviceready", onDeviceReady, false);
-
-            // PhoneGap is ready
+            
+            //Device is ready, Get geolocation data 
             function onDeviceReady() {
-                navigator.geolocation.getCurrentPosition(onSuccess, onError);
+                navigator.geolocation.getCurrentPosition(onSuccess,onError);
             }
-
+            
+            //If successful, get position data
             function onSuccess(position) {
-                var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                //Map Options
+                var latLng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+                //Select map options
                 var mapOptions = {
                     center: latLng,
                     panControl: false,
@@ -30,39 +30,38 @@
                     zoom: 16,
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
-                var mapContent = document.getElementById('map_placer');
-                var map = new google.maps.Map(mapContent, mapOptions);
-                var marker = new google.maps.Marker({position: latLng, map: map});
+                var map = new google.maps.Map(document.getElementById('map_placer'),mapOptions);
+                var marker = new google.maps.Marker({position: latLng,map: map});
             }
-
+            
             //If not successfull, handle errors
             function onError(error) {
                 var errString = '';
                 // Check to see if we have received an error code
-                if (error.code) {
+                if(error.code) {
                     // If we have, handle it by case
-                    switch (error.code)
+                    switch(error.code)
                     {
                         case 1: //Permission Denied
                             errString =
-                                    'Can not fetch the location information ' +
-                                    'because the device does not have permission.';
+                                'Can not fetch the location information ' +
+                                'because the device does not have permission.';
                             break;
                         case 2: //Position is unavailable
                             errString =
-                                    'Can not fetch the location information ' +
-                                    'because the device location could not ' +
-                                    'be determined.';
+                                'Can not fetch the location information ' +
+                                'because the device location could not ' +
+                                'be determined.';
                             break;
                         case 3: //Timeout Error
                             errString =
-                                    'Can not fetch the location within the ' +
-                                    'specified time allocation.';
+                                'Can not fetch the location within the ' +
+                                'specified time allocation.';
                             break;
                         default: //Unknown
                             errString =
-                                    'Can not fetch the location of the ' +
-                                    'device because of an unknown error.';
+                                'Can not fetch the location of the ' +
+                                'device because of an unknown error.';
                             break;
                     }
                 }
@@ -70,7 +69,6 @@
                 var element = document.getElementById('map_placer');
                 element.innerHTML = errString;
             }
-
         </script>
     </head>
     <body>
