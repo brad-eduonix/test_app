@@ -1,31 +1,79 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Device Properties Example</title>
+    <head>
+        <title>PhoneGap Application</title>
+        <style>
+            html{height:100%;}
+            body{height:100%;margin:0;padding:0;}
+            #map_placer{height:100%;width:100%;}
+        </style>
+        <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+        <script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCEG-qhWjPbmE90RbReOEARprr1ajnyqN8&sensor=true"></script>
+        <script type="text/javascript">
 
-    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
-    <script type="text/javascript" charset="utf-8">
+            // Wait for PhoneGap to load
+            document.addEventListener("deviceready", onDeviceReady, false);
 
-    // Wait for device API libraries to load
-    //
-    document.addEventListener("deviceready", onDeviceReady, false);
+            // PhoneGap is ready
+            function onDeviceReady() {
+                navigator.geolocation.getCurrentPosition(onSuccess, onError);
+            }
 
-    // device APIs are available
-    //
-    function onDeviceReady() {
-        var element = document.getElementById('deviceProperties');
-        element.innerHTML = 'Device Name: '     + device.name     + '<br />' +
-                            'Device Cordova: '  + device.cordova  + '<br />' +
-                            'Device Platform: ' + device.platform + '<br />' +
-                            'Device UUID: '     + device.uuid     + '<br />' +
-                            'Device Model: '    + device.model    + '<br />' +
-                            'Device Version: '  + device.version  + '<br />';
-    }
+            function onSuccess(position) {
+                var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                //Map Options
+                var mapOptions = {
+                    center: latLng,
+                    panControl: false,
+                    zoomControl: true,
+                    zoom: 16,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                var mapContent = document.getElementById('map_placer');
+                var map = new google.maps.Map(mapContent, mapOptions);
+                var marker = new google.maps.Marker({position: latLng, map: map});
+            }
 
-    </script>
-  </head>
-  <body>
-      <h1>My Device Info</h1>
-    <p id="deviceProperties">Loading device properties...</p>
-  </body>
+            //If not successfull, handle errors
+            function onError(error) {
+                var errString = '';
+                // Check to see if we have received an error code
+                if (error.code) {
+                    // If we have, handle it by case
+                    switch (error.code)
+                    {
+                        case 1: //Permission Denied
+                            errString =
+                                    'Can not fetch the location information ' +
+                                    'because the device does not have permission.';
+                            break;
+                        case 2: //Position is unavailable
+                            errString =
+                                    'Can not fetch the location information ' +
+                                    'because the device location could not ' +
+                                    'be determined.';
+                            break;
+                        case 3: //Timeout Error
+                            errString =
+                                    'Can not fetch the location within the ' +
+                                    'specified time allocation.';
+                            break;
+                        default: //Unknown
+                            errString =
+                                    'Can not fetch the location of the ' +
+                                    'device because of an unknown error.';
+                            break;
+                    }
+                }
+                //Display errors in div
+                var element = document.getElementById('map_placer');
+                element.innerHTML = errString;
+            }
+
+        </script>
+    </head>
+    <body>
+        <div id="map_placer"></div>
+    </body>
 </html>
