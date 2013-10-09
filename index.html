@@ -2,13 +2,43 @@
 <html>
   <head>
     <title>PhoneGap Application</title>
+    <style>button{background:#333;color:#fff;border-radius:10px;border:2px #666 solid;padding:5px 10px;}</style>
     <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
-    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript">
+        function takePicture(){
+            navigator.device.capture.captureImage(captureSuccess,captureError);
+        }
+        
+        function captureSuccess(mediaFiles){
+            var i, len;
+            for(i = 0,len = mediaFiles.length;i < len; i+=1){
+                uploadFile(mediaFiles[i]);
+            }
+        }
+        
+        function captureError(error){
+            var errMsg = 'An error has occured '+ error.code;
+            navigator.notification.alert(errMsg, null,'oh No!');
+        }
+        
+        function uploadFile(mediaFile){
+            var ft = new FileTransfer(),
+                    path = mediaFile.fullPath,
+                    name = mediaFile.name;
+            ft.upload(
+                    path,
+                    "http://techguystaging.com/test/upload.php",
+                    function(result){
+                        console.log('File Upload: Success!');
+                    },
+                    function(error){
+                        console.log('File Upload: Failed');
+                    },
+                           {fileName: name});
+        }
+    </script>
   </head>
   <body>
-      <button onclick="takePhoto();">Take a Photo</button><br />
-      <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">Get Photo</button><br />
-      <img style="display:none;width:200px;height:190px;" id="dataImage" src="" /><br />
-      <img style="display:none;width:200px;height:190px;" id="urlImage" src="" />
+      <button onclick="takePicture();">Take Picture</button>
   </body>
 </html>
