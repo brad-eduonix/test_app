@@ -2,43 +2,68 @@
 <html>
   <head>
     <title>PhoneGap Application</title>
-    <style>button{background:#333;color:#fff;border-radius:10px;border:2px #666 solid;padding:5px 10px;}</style>
     <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
     <script type="text/javascript">
-        function takePicture(){
-            navigator.device.capture.captureImage(captureSuccess,captureError);
-        }
-        
-        function captureSuccess(mediaFiles){
-            var i, len;
-            for(i = 0,len = mediaFiles.length;i < len; i+=1){
-                uploadFile(mediaFiles[i]);
+    
+    var downloadDirectory = '';
+    
+    // Wait for PhoneGap to load
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    // PhoneGap is ready
+    function onDeviceReady() {
+        window.requestFileSystem(LocalFileSystem.PERSISTENT,0,onFileSystemSuccess,null);
+        $('#download_btn').on('click',function(e){
+            download();
+        })
+    }
+    
+    function onFileSystemSuccess(fileSystem){
+        fileSystem.root.getDirectory('my_downloads',{create:true},function(dir){
+            downloadDirectory = dir;
+        },onError);
+    }
+    
+    function download(){
+        var fileURL = document.getElementById('file_url').value;
+        var localFileName = getFileName(fileURL);
+        $('#message').html('Downloading '+ localFileName);
+        var ft = new FileTransfer();
+        ft.download(
+                fileURL,
+                downloadDirectory.fullPath +'/'+ localFileName,
+                function(entry){
+                    $('#message').html('Download Complete. File saved to: '+
+                            entry.fullPath
+                    );
+                },
+                function(error){
+                    alert('There was an error');
+                }
+    );
+    }
+    
+    function getFileName(url){
+        if(url){
+            var n = url.toString.match(/.*\/(.+?)\./);
+            if(n && n.length > 1){
+                return n[1] + '.'+ url.split('.').pop();
             }
         }
-        
-        function captureError(error){
-            var errMsg = 'An error has occured '+ error.code;
-            navigator.notification.alert(errMsg, null,'oh No!');
-        }
-        
-        function uploadFile(mediaFile){
-            var ft = new FileTransfer(),
-                    path = mediaFile.fullPath,
-                    name = mediaFile.name;
-            ft.upload(
-                    path,
-                    "http://techguystaging.com/test/upload.php",
-                    function(result){
-                        console.log('File Upload: Success!');
-                    },
-                    function(error){
-                        console.log('File Upload: Failed');
-                    },
-                           {fileName: name});
-        }
+        return '';
+    }
+    
+    function onError(error){
+        $('#message').html('There was a problem '+ error.code);
+    }
+    
+
     </script>
   </head>
   <body>
-      <button onclick="takePicture();">Take Picture</button>
+      <input type="text" id="file_url" value="" />
+      <input type="button" id="download_btn" value="Download" />
+      <div id="message"></div>
   </body>
 </html>
