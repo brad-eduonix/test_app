@@ -1,69 +1,68 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>PhoneGap Application</title>
-    <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
-    <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
-    <script type="text/javascript">
-    
-    var downloadDirectory = '';
-    
-    // Wait for PhoneGap to load
-    document.addEventListener("deviceready", onDeviceReady, false);
-
-    // PhoneGap is ready
-    function onDeviceReady() {
-        window.requestFileSystem(LocalFileSystem.PERSISTENT,0,onFileSystemSuccess,null);
-        $('#download_btn').on('click',function(e){
-            download();
-        })
-    }
-    
-    function onFileSystemSuccess(fileSystem){
-        fileSystem.root.getDirectory('my_downloads',{create:true},function(dir){
-            downloadDirectory = dir;
-        },onError);
-    }
-    
-    function download(){
-        var fileURL = document.getElementById('file_url').value;
-        var localFileName = getFileName(fileURL);
-        $('#message').html('Downloading '+ localFileName);
-        var ft = new FileTransfer();
-        ft.download(
+    <head>
+        <meta name="viewport" content="user-scalable=no,initial-scale=1, maximum-scale=1,minimum-scale=1, width=device-width" />
+        <title>File Download</title>
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript">          
+             var downloadDirectory;
+             
+            document.addEventListener("deviceready", onDeviceReady, true);
+            
+            function onDeviceReady() {
+                window.requestFileSystem(LocalFileSystem.PERSISTENT,0,onFileSystemSuccess,null);
+                $('#download_btn').on( 'click', function(e) {
+                    download();
+                });
+            }
+            
+            function onFileSystemSuccess(fileSystem) {
+                fileSystem.root.getDirectory('my_downloads',
+                {create:true},
+                function(dir) {
+                    downloadDirectory = dir;
+                },onError);
+            }
+            
+             function download() {
+                var fileURL = document.getElementById('file_url').value;
+                var localFileName = getFilename(fileURL);
+                $('#message').html('Downloading ' + localFileName);
+                var fileTransfer = new FileTransfer();
+                fileTransfer.download(
                 fileURL,
-                downloadDirectory.fullPath +'/'+ localFileName,
+                downloadDirectory.fullPath + '/' + localFileName,
                 function(entry){
-                    $('#message').html('Download Complete. File saved to: '+
-                            entry.fullPath
-                    );
+                    $('#message').html('Download complete. File saved to: ' +
+                        entry.fullPath);
                 },
                 function(error){
-                    alert('There was an error');
+                    alert("Download error source " + JSON.stringify(error));
                 }
-    );
-    }
-    
-    function getFileName(url){
-        if(url){
-            var n = url.toString.match(/.*\/(.+?)\./);
-            if(n && n.length > 1){
-                return n[1] + '.'+ url.split('.').pop();
+            );
             }
-        }
-        return '';
-    }
-    
-    function onError(error){
-        $('#message').html('There was a problem '+ error.code);
-    }
-    
-
-    </script>
-  </head>
-  <body>
-      <input type="text" id="file_url" value="" />
-      <input type="button" id="download_btn" value="Download" />
-      <div id="message"></div>
-  </body>
+            
+            function getFilename(url) {
+                if (url) {
+                    var m = url.toString().match(/.*\/(.+?)\./);
+                    if (m && m.length > 1) {
+                        return m[1] + '.' + url.split('.').pop();
+                    }
+                }
+                return "";
+            }
+            
+            function onError(error) {
+                $('#message').html(
+                'We encountered a problem: ' + error.code);
+            }
+            
+	</script>
+    </head>
+    <body>
+        <input type="text" id="file_url" value="" />
+        <input type="button" id="download_btn" value="Download" />
+        <div id="message"></div>
+    </body>
 </html>
