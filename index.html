@@ -12,60 +12,65 @@
 
             //Device is ready
             function onDeviceReady() {
-                
-            }
-            
-            $(document).ready(function(){
-                $('button#add').bind('click',function(e){
-                    e.preventDefault();
-                    var task = $('#taskInput').val();
-                    console.log('Task Entered'); 
-                    addTask(task);
+                $(document).ready(function(){
+                    $('#saveBtn').bind('click',function(){
+                        saveContact();
+                    });
                 });
-            });
-            
-            function addTask(task){
-                console.log('Adding Task...'); 
-                var newDate = new Date();
-                var taskID = newDate.getTime();
-                try{
-                    localStorage.setItem(taskID,task);
-                } catch(e){
-                    if(e == QUOTA_EXCEEDED_ERR){
-                        alert('You have no space!');
-                    }
-                }
-                getTasks();
             }
             
-            function getTasks(){
-                var output = "";
-                for(var i =0;i < localStorage.length;i++){
-                    output += '<li>'+localStorage.getItem(localStorage.key(i))+'</li>';
-                }
-                $('#tasks').html(output);
-                $('#tasks').listview("refresh");
+            function saveContact(){
+                console.log("Getting Contact Info...");
+                //Create variables from input
+                var firstName = document.getElementById('firstName').value;
+                var lastName = document.getElementById('lastName').value;
+                var fullName = firstName+' '+lastName;
+                var note = document.getElementById('note').value;
+                var emailAddress = document.getElementById('email').value;
+                
+                //Create contact object
+                var theContact = navigator.contacts.create({"displayName" : fullName});
+                
+                //Note Field
+                theContact.note =  note;
+                
+                //Email Field
+                var emails = [];
+                emails[0] = new ContactField('email',emailAddress,false);
+                
+                theContact.save(onSaveSuccess,onSaveError);
             }
             
-            function clearAll(){
-                localStorage.clear();
-                $('#tasks').html("");
-                return false();
+            //Contact Added
+            function onSaveSuccess(){
+                console.log('Contact Saved!');
+                alert('Your contact has been saved');
+            }
+            
+            //There was an error
+            function onSaveError(error){
+                console.log('Error: '+error.code);
+                alert('Error: '+error.code);
             }
         </script>
     </head>
-    <body onload="getTasks();">
+    <body>
         <div data-role="page">
             <div data-role="header">
-                <h2>Add Task</h2>
+                <h2> Add Contact</h2>
             </div>
             <div data-role="content">
-                <input id="taskInput" type="text" placeholder="Add Task.." />
-                <button id="add">Add Task</button>
-                <br />
-                <button onclick="clearAll();">Clear Tasks</button>
-                <br />
-                <ul data-role="listview" id="tasks"></ul>
+        <form>
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" />
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" />
+            <label for="email">Email</label>
+            <input type="text" id="email" />
+            <label for="note">Note</label>
+            <textarea id="note"></textarea>
+            <input type="button" name="save" id="saveBtn" value="Save Contact" />
+        </form>
             </div>
             <div data-role="footer">
                 <h4>Copyright &copy; 2013</h4>
